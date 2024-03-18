@@ -1,0 +1,5 @@
+.idea
+.venv
+info
+**/__pycache__
+barbers/db.sqlite3
