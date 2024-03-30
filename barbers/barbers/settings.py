@@ -81,13 +81,24 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
         'OPTIONS': {
-            'options': '-c search_path=main'
+            'options': '-c search_path=main,public'
         },
         'USER': 'postgres',
         'PASSWORD': '381381381Gg!',
         'HOST': 'localhost',
         'PORT': '5432',
-    }
+    },
+    'test': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'OPTIONS': {
+            'options': '-c search_path=main,public'
+        },
+        'USER': 'postgres',
+        'PASSWORD': '381381381Gg!',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
 }
 
 
@@ -119,7 +130,7 @@ TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -131,3 +142,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+
+     'DATETIME_FORMAT': "%H:%M",
+}
