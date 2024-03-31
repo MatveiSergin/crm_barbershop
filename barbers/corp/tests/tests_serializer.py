@@ -5,10 +5,10 @@ from django.test import TestCase
 from django.db import connection
 
 from corp.models import Appointment, Client, Service, Barbershop, Staff, Position
-from corp.serializers import Appointment_detail_serializer
+from corp.serializers import Appointment_detail_serializer, Staff_serializer
 
 
-class test_AppointmentDetailSerializer(TestCase):
+class Test_appointment_detail_serializer(TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -118,6 +118,79 @@ class test_AppointmentDetailSerializer(TestCase):
                 },
                 "start_time": "10:00",
                 "end_time": "10:30"
+            }
+        ]
+
+        self.assertEqual(serializer_data, data)
+
+
+class Test_staff_serializer(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        with connection.schema_editor() as schema_editor:
+            schema_editor.create_model(Barbershop)
+            schema_editor.create_model(Staff)
+            schema_editor.create_model(Position)
+
+        barbershop = Barbershop.objects.create(
+            region='Московская область',
+            city='Москва',
+            street='Оршанская',
+            house='4',
+            postal_code=121552,
+            mail='orsknka228@mai.com',
+            phone=9612345678,
+        )
+
+        position1 = Position.objects.create(
+            position='barber'
+        )
+
+        position2 = Position.objects.create(
+            position='main_barber'
+        )
+
+        Staff.objects.create(
+            name='Staff_name',
+            surname='Staff_surname',
+            patronymic='Staff_patronymic',
+            mail='employee1@yandex.ru',
+            position=position1,
+            barbershop=barbershop,
+            phone=9998887766,
+        )
+
+        Staff.objects.create(
+            name='Staff_name2',
+            surname='Staff_surname2',
+            patronymic='Staff_patronymic2',
+            mail='employee2@yandex.ru',
+            position=position2,
+            barbershop=barbershop,
+            phone=9998487599,
+        )
+
+    def test_data(self):
+        first_employee = Staff.objects.get(id=1)
+        second_employee = Staff.objects.get(id=2)
+        serializer_data = Staff_serializer([first_employee, second_employee], many=True).data
+        data = [
+            {
+                "barbershop_id": 1,
+                "position": "barber",
+                "name": "Staff_name",
+                "surname": "Staff_surname",
+                "phone": "+7 (999) 888-77-66",
+                "mail": "employee1@yandex.ru"
+            },
+            {
+                "barbershop_id": 1,
+                "position": "main_barber",
+                "name": "Staff_name2",
+                "surname": "Staff_surname2",
+                "phone": "+7 (999) 848-75-99",
+                "mail": "employee2@yandex.ru"
             }
         ]
 

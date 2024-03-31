@@ -5,14 +5,18 @@ from rest_framework import serializers
 from .models import Staff, Appointment, Barbershop, Position, Client, Service
 from .templates import phonenumber_to_show
 
+class BarbershopSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Barbershop
+        fields = '__all__'
 
 class Staff_serializer(serializers.ModelSerializer):
-    #barbershop = serializers.CharField(source='barbershop.address')
+    barbershop_id = serializers.PrimaryKeyRelatedField(source='barbershop.id', read_only=True)
     position = serializers.CharField(source='position.position')
 
     class Meta:
         model = Staff
-        fields = ['position', 'name', 'surname', 'phone', 'mail']
+        fields = ['barbershop_id', 'position', 'name', 'surname', 'phone', 'mail']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

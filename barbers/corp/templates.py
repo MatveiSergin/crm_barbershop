@@ -31,8 +31,3 @@ def phonenumber_to_db(value):
         return phone
 
     return None
-
-
-value = 9610845144
-phonenumber = phonenumber_to_show(value)
-print(phonenumber)
