@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -79,25 +81,25 @@ WSGI_APPLICATION = 'barbers.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': os.getenv('DB_NAME'),
         'OPTIONS': {
             'options': '-c search_path=main,public'
         },
-        'USER': 'postgres',
-        'PASSWORD': '381381381Gg!',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD':  os.getenv('DB_PASSWORD'),
+        'HOST':  os.getenv('DB_HOST'),
+        'PORT':  os.getenv('DB_PORT'),
     },
     'test': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
+        'NAME': os.getenv('DB_NAME'),
         'OPTIONS': {
             'options': '-c search_path=main,public'
         },
-        'USER': 'postgres',
-        'PASSWORD': '381381381Gg!',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     },
 }
 
@@ -145,7 +147,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
      'DATETIME_FORMAT': "%H:%M",
-     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-    ]
+     #'DEFAULT_RENDERER_CLASSES': [
+     #   'rest_framework.renderers.JSONRenderer',
+    #]
 }

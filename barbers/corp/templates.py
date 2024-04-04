@@ -28,6 +28,6 @@ def phonenumber_to_db(value):
         phone = phone[1:]
 
     if len(phone) == 10:
-        return phone
-
-    return None
+        return int(phone)
+    else:
+        raise ValueError('Invalid phone number')

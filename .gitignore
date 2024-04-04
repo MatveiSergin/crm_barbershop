@@ -3,3 +3,4 @@
 info
 **/__pycache__
 barbers/db.sqlite3
+*.env

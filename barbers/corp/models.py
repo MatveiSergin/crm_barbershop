@@ -42,7 +42,7 @@ class Barbershop(models.Model):
 class Client(models.Model):
     name = models.CharField()
     surname = models.CharField()
-    phone = models.BigIntegerField(unique=True)
+    phone = models.BigIntegerField()
     mail = models.CharField(unique=True, blank=True, null=True, validators=[validate_email])
 
     def save(self, *args, **kwargs):
