@@ -80,3 +80,8 @@ class Appointment_detail_serializer(serializers.ModelSerializer):
         data['end_time'] = (datetime(year=1, month=1, day=1, hour=next(start_time), minute=next(start_time)) + timedelta(minutes=30)).strftime("%H:%M")
         data.pop('data')
         return data
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['name', 'price', 'description']

@@ -108,9 +108,6 @@ class AppointmentValidator:
             services = Service.objects.filter(name=service_name)
             if services:
                 self.service = services[0]
-                for i in MasterService.objects.filter(staff=self.staff):
-                    print(i, i.service)
-                print(self.service)
                 if not MasterService.objects.filter(staff=self.staff).filter(service=self.service):
                     self.error = "The master does not provide this service"
                     return

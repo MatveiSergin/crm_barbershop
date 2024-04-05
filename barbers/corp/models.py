@@ -91,7 +91,7 @@ class Position(models.Model):
 
 
 class Service(models.Model):
-    price = models.IntegerField(blank=True, null=True)
+    price = models.IntegerField()
     name = models.CharField()
     description = models.CharField(blank=True, null=True)
 
