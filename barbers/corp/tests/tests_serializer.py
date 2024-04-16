@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.test import TestCase
 from django.db import connection
 
-from corp.models import Appointment, Client, Service, Barbershop, Staff, Position
-from corp.serializers import Appointment_detail_serializer, Staff_serializer
+from corp.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
+from corp.serializers import Appointment_detail_serializer, StaffSerializer
 
 
 class Test_appointment_detail_serializer(TestCase):
@@ -132,6 +132,8 @@ class Test_staff_serializer(TestCase):
             schema_editor.create_model(Barbershop)
             schema_editor.create_model(Staff)
             schema_editor.create_model(Position)
+            schema_editor.create_model(MasterService)
+            schema_editor.create_model(Service)
 
         barbershop = Barbershop.objects.create(
             region='Московская область',
@@ -144,14 +146,15 @@ class Test_staff_serializer(TestCase):
         )
 
         position1 = Position.objects.create(
-            position='barber'
+            position='barber',
+            has_accept_appointments=True
         )
 
         position2 = Position.objects.create(
-            position='main_barber'
+            position='menedjer'
         )
 
-        Staff.objects.create(
+        staff1 = Staff.objects.create(
             name='Staff_name',
             surname='Staff_surname',
             patronymic='Staff_patronymic',
@@ -171,26 +174,75 @@ class Test_staff_serializer(TestCase):
             phone=9998487599,
         )
 
+        service1 = Service.objects.create(
+            name='Service_name1',
+            price=300,
+            description='Service_description1'
+        )
+
+        service2 = Service.objects.create(
+            name='Service_name2',
+            price=3000,
+            description='Service_description2'
+        )
+
+        MasterService.objects.create(
+            staff=staff1,
+            service=service1
+        )
+
+        MasterService.objects.create(
+            staff=staff1,
+            service=service2
+        )
+
     def test_data(self):
         first_employee = Staff.objects.get(id=1)
         second_employee = Staff.objects.get(id=2)
-        serializer_data = Staff_serializer([first_employee, second_employee], many=True).data
+        serializer_data = StaffSerializer([first_employee, second_employee], many=True).data
         data = [
             {
-                "barbershop_id": 1,
-                "position": "barber",
+                "id": 1,
+                "barbershop": {
+                    "id": 1,
+                    "city": "Москва",
+                    "street": "Оршанская"
+                },
                 "name": "Staff_name",
                 "surname": "Staff_surname",
+                "patronymic": "Staff_patronymic",
+                "position": "barber",
                 "phone": "+7 (999) 888-77-66",
-                "mail": "employee1@yandex.ru"
+                "mail": "employee1@yandex.ru",
+                "services": [
+                    {
+                        "service": {
+                            "name": "Service_name1",
+                            "price": 300,
+                        }
+                    },
+                    {
+                        "service": {
+                            "name": "Service_name2",
+                            "price": 3000,
+                        }
+                    }
+                ]
             },
             {
-                "barbershop_id": 1,
-                "position": "main_barber",
+                "id": 2,
+                "barbershop": {
+                    "id": 1,
+                    "city": "Москва",
+                    "street": "Оршанская"
+                },
                 "name": "Staff_name2",
                 "surname": "Staff_surname2",
+                "patronymic": "Staff_patronymic2",
+                "position": "menedjer",
                 "phone": "+7 (999) 848-75-99",
-                "mail": "employee2@yandex.ru"
+                "mail": "employee2@yandex.ru",
+                "services": None
             }
         ]
 

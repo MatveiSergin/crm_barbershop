@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.db import connection
@@ -34,7 +36,8 @@ class TestAppointmentAPI(APITestCase):
         )
 
         position = Position.objects.create(
-            position='barber'
+            position='barber',
+            has_accept_appointments=True
         )
         staff = Staff.objects.create(
             name='Staff_name',
@@ -127,7 +130,6 @@ class TestAppointmentAPI(APITestCase):
                 "phone": client.phone
             }
         }
-
         response = self.client.post(
             path=url,
             data=data,
@@ -194,6 +196,10 @@ class TestServiceAPI(APITestCase):
         super().setUpTestData()
         with connection.schema_editor() as schema_editor:
             schema_editor.create_model(Service)
+            schema_editor.create_model(MasterService)
+            schema_editor.create_model(Staff)
+            schema_editor.create_model(Barbershop)
+            schema_editor.create_model(Position)
 
         Service.objects.create(
             price=500,
@@ -233,13 +239,11 @@ class TestServiceAPI(APITestCase):
             'description': 'Lol!'
         }
 
-        new_service_data = ServiceSerializer(new_service).data
-
-        response = self.client.post(url, new_service_data)
-        result_data = new_service_data
-
+        self.assertEqual(Service.objects.all().count(), 2)
+        json_data = json.dumps(new_service)
+        response = self.client.post(url, json_data, content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data, result_data)
+        self.assertEqual(Service.objects.all().count(), 3)
 
     def test_put_when_service_already_exists(self):
         id_service = 1
@@ -290,7 +294,6 @@ class TestServiceAPI(APITestCase):
 
         response = self.client.delete(path=url, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-
 
 
 

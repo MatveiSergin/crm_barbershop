@@ -34,6 +34,8 @@ class Barbershop(models.Model):
         self.phone = phonenumber_to_db(self.phone)
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return f'{self.city}-{self.street}'
     class Meta:
         managed = False
         db_table = 'barbershop'
@@ -84,6 +86,7 @@ class MasterService(models.Model):
 
 class Position(models.Model):
     position = models.CharField(unique=True)
+    has_accept_appointments = models.BooleanField(default=False)
 
     class Meta:
         managed = False
@@ -116,6 +119,9 @@ class Staff(models.Model):
 
     def get_full_name(self):
         return f'{self.name} {self.surname}'
+
+    def __str__(self):
+        return self.get_full_name()
 
     def save(self, *args, **kwargs):
         self.phone = phonenumber_to_db(self.phone)

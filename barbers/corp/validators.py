@@ -66,7 +66,12 @@ class AppointmentValidator:
         if staff_name and staff_surname:
             staffs = Staff.objects.filter(name=staff_name).filter(surname=staff_surname)
         if staffs:
-            self.staff = staffs[0]
+            possible_staff = staffs.first()
+            if possible_staff.position.has_accept_appointments:
+                self.staff = possible_staff
+            else:
+                self.error = "Staff has not accept appointments"
+                return
         else:
             self.error = "Staff not found"
             return

@@ -3,19 +3,14 @@ from rest_framework import filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListCreateAPIView, ListAPIView
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.views import APIView
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from django.core.exceptions import ObjectDoesNotExist
-from .models import Staff, Appointment, Service, Client
-from .serializers import Staff_serializer, Appointment_detail_serializer, ServiceSerializer
+from .models import Staff, Appointment, Service, Client, MasterService, Position, Barbershop
+from .serializers import StaffSerializer, Appointment_detail_serializer, ServiceSerializer
 from .templates import phonenumber_to_db
 from .validators import AppointmentValidator
 
-
-class StaffApiView(ListCreateAPIView):
-    queryset = Staff.objects.all()
-    serializer_class = Staff_serializer
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['barbershop_id']
 
 class AppointmentViewSet(ModelViewSet):
     queryset = Appointment.objects.all()
@@ -102,3 +97,12 @@ class ServiceViewSet(ModelViewSet):
                 return Response({'error': 'Service with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         return super().update(self, request, *args, **kwargs)
+
+class StaffVeiwSet(ModelViewSet):
+    queryset = Staff.objects.all()
+    serializer_class = StaffSerializer
+    filterset_fields = ['barbershop__city',
+                        'barbershop__street',
+                        'barbershop__postal_code',
+                        'name',
+                        'surname']

@@ -3,43 +3,24 @@ from datetime import date, datetime, timedelta
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
-from .models import Staff, Appointment, Barbershop, Position, Client, Service
+from .models import Staff, Appointment, Barbershop, Position, Client, Service, MasterService
 from .templates import phonenumber_to_show
 
 class BarbershopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Barbershop
-        fields = '__all__'
+        fields = ['id', 'city', 'street']
 
-class Staff_serializer(serializers.ModelSerializer):
-    barbershop_id = serializers.PrimaryKeyRelatedField(source='barbershop.id', read_only=True)
-    position = serializers.CharField(source='position.position')
-
-    class Meta:
-        model = Staff
-        fields = ['barbershop_id', 'position', 'name', 'surname', 'phone', 'mail']
-
-    def to_representation(self, instance):
-        data = super().to_representation(instance)
-        data['phone'] = phonenumber_to_show(data['phone'])
-        return data
-
-    def create(self, validated_data):
-        #barbershop = Barbershop.objects.get(address=validated_data['barbershop']['address'])
-        #validated_data['barbershop'] = barbershop
-        position = Position.objects.get(position=validated_data['position']['position'])
-        validated_data['position'] = position
-        return Staff.objects.create(**validated_data)
-
-
-
-
-class Staff_for_appointment_serializer(serializers.ModelSerializer):
+class StaffSerializerForInfo(serializers.ModelSerializer):
     class Meta:
         model = Staff
 
 
         fields = ['name', 'surname']
+
+
+
+
 class Client_for_appointment_serializer(serializers.ModelSerializer):
     class Meta:
         model = Client
@@ -48,10 +29,7 @@ class Client_for_appointment_serializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data['phone'] = phonenumber_to_show(data['phone'])
         return data
-
-
-
-class Service_for_appointment_serializer(serializers.ModelSerializer):
+class ServiceSerializerForInfo(serializers.ModelSerializer):
     price = serializers.IntegerField(read_only=True)
     class Meta:
         model = Service
@@ -60,8 +38,8 @@ class Service_for_appointment_serializer(serializers.ModelSerializer):
 
 
 class Appointment_detail_serializer(serializers.ModelSerializer):
-    service = Service_for_appointment_serializer()
-    staff = Staff_for_appointment_serializer()
+    service = ServiceSerializerForInfo()
+    staff = StaffSerializerForInfo()
     client = Client_for_appointment_serializer()
     class Meta:
         model = Appointment
@@ -81,7 +59,46 @@ class Appointment_detail_serializer(serializers.ModelSerializer):
         data.pop('data')
         return data
 
+
+
 class ServiceSerializer(serializers.ModelSerializer):
+    staff = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Service
-        fields = ['name', 'price', 'description']
+        fields = ['name', 'price', 'description', 'staff']
+
+    def get_staff(self, obj):
+        staff_services = MasterService.objects.filter(service=obj)
+        staff_serializer = MasterServiceSerializerForStaff(staff_services, many=True)
+        return staff_serializer.data
+
+class MasterServiceSerializerForStaff(serializers.ModelSerializer):
+    staff = StaffSerializerForInfo()
+    class Meta:
+        model = MasterService
+        fields = ['staff']
+
+
+class StaffSerializer(serializers.ModelSerializer):
+    services = serializers.SerializerMethodField()
+    barbershop = BarbershopSerializer()
+    position = serializers.CharField(source='position.position')
+    phone = serializers.SerializerMethodField()
+    class Meta:
+        model = Staff
+        fields = ['id', 'barbershop', 'name', 'surname', 'patronymic', 'position', 'phone', 'mail', 'services']
+
+    def get_services(self, obj):
+        if obj.position.has_accept_appointments:
+            master_services = MasterService.objects.filter(staff=obj)
+            serializer = MasterServiceSerializerForService(master_services, many=True)
+            return serializer.data
+
+    def get_phone(self, obj):
+        return phonenumber_to_show(obj.phone)
+
+class MasterServiceSerializerForService(serializers.ModelSerializer):
+    service = ServiceSerializerForInfo()
+    class Meta:
+        model = MasterService
+        fields = ['service']
