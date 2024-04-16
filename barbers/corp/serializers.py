@@ -16,7 +16,7 @@ class StaffSerializerForInfo(serializers.ModelSerializer):
         model = Staff
 
 
-        fields = ['name', 'surname']
+        fields = ['id', 'name', 'surname']
 
 
 
@@ -24,7 +24,7 @@ class StaffSerializerForInfo(serializers.ModelSerializer):
 class Client_for_appointment_serializer(serializers.ModelSerializer):
     class Meta:
         model = Client
-        fields = ['name', 'surname', 'phone']
+        fields = ['id', 'name', 'surname', 'phone']
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data['phone'] = phonenumber_to_show(data['phone'])
@@ -33,7 +33,7 @@ class ServiceSerializerForInfo(serializers.ModelSerializer):
     price = serializers.IntegerField(read_only=True)
     class Meta:
         model = Service
-        fields = ['name', 'price']
+        fields = ['id', 'name', 'price']
 
 
 
@@ -43,7 +43,7 @@ class Appointment_detail_serializer(serializers.ModelSerializer):
     client = Client_for_appointment_serializer()
     class Meta:
         model = Appointment
-        fields = ['data', 'service', 'staff', 'client']
+        fields = ['id', 'data', 'service', 'staff', 'client']
 
 
     def create(self, validated_data):
@@ -65,7 +65,7 @@ class ServiceSerializer(serializers.ModelSerializer):
     staff = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = Service
-        fields = ['name', 'price', 'description', 'staff']
+        fields = ['id', 'name', 'price', 'description', 'staff']
 
     def get_staff(self, obj):
         staff_services = MasterService.objects.filter(service=obj)
@@ -102,3 +102,9 @@ class MasterServiceSerializerForService(serializers.ModelSerializer):
     class Meta:
         model = MasterService
         fields = ['service']
+
+class FreeTimeSerializer(serializers.Serializer):
+    serializers.ListField(child=serializers.CharField())
+
+
+

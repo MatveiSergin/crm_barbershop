@@ -1,4 +1,7 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
+
+import datetime
+
 from rest_framework import filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListCreateAPIView, ListAPIView
@@ -6,9 +9,11 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from django.core.exceptions import ObjectDoesNotExist
+
+from .config import START_WORKING, END_WORKING
 from .models import Staff, Appointment, Service, Client, MasterService, Position, Barbershop
-from .serializers import StaffSerializer, Appointment_detail_serializer, ServiceSerializer
-from .templates import phonenumber_to_db
+from .serializers import StaffSerializer, Appointment_detail_serializer, ServiceSerializer, FreeTimeSerializer
+from .templates import phonenumber_to_db, get_free_time, serialize_time_set
 from .validators import AppointmentValidator
 
 
@@ -104,5 +109,32 @@ class StaffVeiwSet(ModelViewSet):
     filterset_fields = ['barbershop__city',
                         'barbershop__street',
                         'barbershop__postal_code',
+                        'barbershop__id',
                         'name',
                         'surname']
+
+class FreeTimes(APIView):
+    def get(self, request):
+        if not 'master_id' in request.query_params and 'date' in request.query_params:
+            return Response({'error': 'Missing parameters'})
+
+        master_id = request.query_params.get('master_id')
+
+        if not Staff.objects.filter(id=master_id):
+            return Response({"error": "Master not found"})
+
+        query_date = map(int, request.query_params.get('date').split("-"))
+        queryset = Appointment.objects.filter(data__date=date(
+            next(query_date),
+            next(query_date),
+            next(query_date)
+        )).filter(
+            staff=master_id
+        )
+        free_times = get_free_time(queryset)
+        times_for_serializer = serialize_time_set(free_times)
+        if times_for_serializer:
+            return Response({'times': sorted(times_for_serializer['times'])})
+        else:
+            return Response({"error": "Master not found"})
+

@@ -1,5 +1,7 @@
 from datetime import date, time, datetime, timedelta
 
+from corp.config import START_WORKING, END_WORKING
+
 
 def phonenumber_to_show(value):
     if isinstance(value, int):
@@ -31,3 +33,17 @@ def phonenumber_to_db(value):
         return int(phone)
     else:
         raise ValueError('Invalid phone number')
+
+
+def get_free_time(queryset):
+    booked_time = set()
+
+    for i in queryset.all():
+        booked_time.add(i.data.time())
+
+    all_times = set(time(hours, minutes) for hours in range(START_WORKING.hour, END_WORKING.hour) for minutes in range(0, 60, 30))
+
+    return all_times.difference(booked_time)
+
+def serialize_time_set(time_set):
+    return {'times': [time_obj.strftime('%H:%M') for time_obj in time_set]}

@@ -10,4 +10,5 @@ router.register(r'services', ServiceViewSet, basename='services') #http://127.0.
 
 urlpatterns = [
     path('', include(router.urls)), #http://127.0.0.1:8000/api/v1/appointments?date=2024-03-18
+    path('FreeTimes', FreeTimes.as_view()) #http://127.0.0.1:8000/api/v1/FreeTimes/
 ]
