@@ -12,7 +12,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .config import START_WORKING, END_WORKING
 from .models import Staff, Appointment, Service, Client, MasterService, Position, Barbershop
-from .serializers import StaffSerializer, Appointment_detail_serializer, ServiceSerializer, FreeTimeSerializer
+from .serializers import StaffSerializer, Appointment_detail_serializer, ServiceSerializer, FreeTimeSerializer, \
+    MasterServiceSerializer
 from .templates import phonenumber_to_db, get_free_time, serialize_time_set
 from .validators import AppointmentValidator
 
@@ -138,3 +139,6 @@ class FreeTimes(APIView):
         else:
             return Response({"error": "Master not found"})
 
+class MasterServiceAPI(ModelViewSet):
+    queryset = MasterService.objects.all()
+    serializer_class = MasterServiceSerializer

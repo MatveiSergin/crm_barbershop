@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.db import connection
 from corp.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
-from corp.serializers import Appointment_detail_serializer, ServiceSerializer, StaffSerializer
+from corp.serializers import Appointment_detail_serializer, ServiceSerializer, StaffSerializer, MasterServiceSerializer
 from datetime import datetime
 from datetime import date
 from django.urls import reverse
@@ -300,7 +300,6 @@ class TestServiceAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 class TestStaffAPI(APITestCase):
-
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
@@ -425,3 +424,113 @@ class TestStaffAPI(APITestCase):
         result_data = StaffSerializer(updating_staff).data
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertDictEqual(response.data, result_data)
+
+class TestMasterServiceAPI(APITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        with connection.schema_editor() as schema_editor:
+            schema_editor.create_model(Service)
+            schema_editor.create_model(MasterService)
+            schema_editor.create_model(Staff)
+            schema_editor.create_model(Barbershop)
+            schema_editor.create_model(Position)
+
+        barbershop = Barbershop.objects.create(
+            region='Московская область',
+            city='Москва',
+            street='Оршанская',
+            house='4',
+            postal_code=121552,
+            mail='orsknka228@mai.com',
+            phone=9612345678,
+        )
+
+        position = Position.objects.create(
+            position='barber',
+            has_accept_appointments=True
+        )
+
+        Staff.objects.create(
+            name='Staff_name',
+            surname='Staff_surname',
+            patronymic='Staff_patronymic',
+            mail='matvei.sergin2016@yandex.ru',
+            position=position,
+            barbershop=barbershop,
+            phone=9998887766,
+        )
+
+        staff2 = Staff.objects.create(
+            name='Staff_name2',
+            surname='Staff_surname2',
+            patronymic='Staff_patronymic2',
+            mail='qwerty123@yandex.ru',
+            position=position,
+            barbershop=barbershop,
+            phone=9878237462,
+        )
+
+        service1 = Service.objects.create(
+            price=500,
+            name='Service name',
+            description='Service description',
+        )
+        service2 = Service.objects.create(
+            price=1000,
+            name='Service name2',
+            description='Service description2',
+        )
+
+        MasterService.objects.create(
+            staff=staff2,
+            service=service1
+        )
+
+        MasterService.objects.create(
+            staff=staff2,
+            service=service2
+        )
+
+    def test_get(self):
+        url = 'http://127.0.0.1:8000/api/v1/master_services/'
+        master_services = [MasterService.objects.get(id=1), MasterService.objects.get(id=2)]
+        response = self.client.get(url)
+        result_data = MasterServiceSerializer(master_services, many=True).data
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, result_data)
+
+    def test_post(self):
+        url = 'http://127.0.0.1:8000/api/v1/master_services/'
+
+        data = {
+            "staff": 1,
+            "service": 1
+        }
+
+        response = self.client.post(url, data, format='json')
+
+        result_data = {
+            "id": 3,
+            "staff": 1,
+            "service": 1
+        }
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data, result_data)
+
+    def test_put_and_patch(self):
+        masterservice_id = 1
+        url = f'http://127.0.0.1:8000/api/v1/master_services/{masterservice_id}/'
+
+        data = {
+            "staff": 2,
+            "service": 2
+        }
+
+        response1 = self.client.put(url, data, format='json')
+        response2 = self.client.patch(url, data, format='json')
+
+        self.assertEqual(response1.status_code, response2.status_code)
+        self.assertEqual(response1.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)

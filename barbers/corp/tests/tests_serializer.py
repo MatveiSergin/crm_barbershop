@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.db import connection
 
 from corp.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
-from corp.serializers import Appointment_detail_serializer, StaffSerializer
+from corp.serializers import Appointment_detail_serializer, StaffSerializer, MasterServiceSerializer
 
 
 class Test_appointment_detail_serializer(TestCase):
@@ -257,3 +257,95 @@ class Test_staff_serializer(TestCase):
         ]
 
         self.assertEqual(serializer_data, data)
+
+class TestMasterServiceSerializer(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        with connection.schema_editor() as schema_editor:
+            schema_editor.create_model(Barbershop)
+            schema_editor.create_model(Staff)
+            schema_editor.create_model(Position)
+            schema_editor.create_model(MasterService)
+            schema_editor.create_model(Service)
+
+        barbershop = Barbershop.objects.create(
+            region='Московская область',
+            city='Москва',
+            street='Оршанская',
+            house='4',
+            postal_code=121552,
+            mail='orsknka228@mai.com',
+            phone=9612345678,
+        )
+
+        position1 = Position.objects.create(
+            position='barber',
+            has_accept_appointments=True
+        )
+
+        position2 = Position.objects.create(
+            position='menedjer'
+        )
+
+        staff1 = Staff.objects.create(
+            name='Staff_name',
+            surname='Staff_surname',
+            patronymic='Staff_patronymic',
+            mail='employee1@yandex.ru',
+            position=position1,
+            barbershop=barbershop,
+            phone=9998887766,
+        )
+
+        Staff.objects.create(
+            name='Staff_name2',
+            surname='Staff_surname2',
+            patronymic='Staff_patronymic2',
+            mail='employee2@yandex.ru',
+            position=position2,
+            barbershop=barbershop,
+            phone=9998487599,
+        )
+
+        service1 = Service.objects.create(
+            name='Service_name1',
+            price=300,
+            description='Service_description1'
+        )
+
+        service2 = Service.objects.create(
+            name='Service_name2',
+            price=3000,
+            description='Service_description2'
+        )
+
+        MasterService.objects.create(
+            staff=staff1,
+            service=service1
+        )
+
+        MasterService.objects.create(
+            staff=staff1,
+            service=service2
+        )
+
+    def test_data(self):
+        master_service1 = MasterService.objects.get(id=1)
+        master_service2 = MasterService.objects.get(id=2)
+
+        serializer_data = MasterServiceSerializer([master_service1, master_service2], many=True).data
+
+        result_data = [
+            {
+                "id": 1,
+                "staff": 1,
+                "service": 1
+            },
+            {
+                "id": 2,
+                "staff": 1,
+                "service": 2
+            }
+        ]
+        self.assertEqual(serializer_data, result_data)

@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta
 
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
+from rest_framework.exceptions import MethodNotAllowed
 
 from .models import Staff, Appointment, Barbershop, Position, Client, Service, MasterService
 from .templates import phonenumber_to_show, phonenumber_to_db
@@ -150,5 +151,21 @@ class MasterServiceSerializerForService(serializers.ModelSerializer):
 class FreeTimeSerializer(serializers.Serializer):
     serializers.ListField(child=serializers.CharField())
 
+class MasterServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MasterService
+        fields = ['id', 'staff', 'service']
 
+    def update(self, instance, validated_data):
+        raise MethodNotAllowed(self.context['request'].stream.method)
 
+    def create(self, validated_data):
+        staff_id = validated_data.pop('staff')
+        service_id = validated_data.pop('service')
+
+        same_MaserServive = MasterService.objects.filter(staff=staff_id).filter(service=service_id)
+
+        if not same_MaserServive:
+            return MasterService.objects.create(staff=staff_id, service=service_id)
+        else:
+            raise serializers.ValidationError('Master Service already exists')
