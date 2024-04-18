@@ -25,9 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-=&11xngbv-+(o1708+@91znxakpg2!szl%j(lpv4#f95p_6gf5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
+ALLOWED_HOSTS = ['89.223.127.66', 'corp-barbers.duckdns.org']
 
 
 # Application definition
@@ -81,26 +81,26 @@ WSGI_APPLICATION = 'barbers.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
+        'NAME': 'barbers',
         'OPTIONS': {
             'options': '-c search_path=main,public'
         },
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD':  os.getenv('DB_PASSWORD'),
-        'HOST':  os.getenv('DB_HOST'),
-        'PORT':  os.getenv('DB_PORT'),
+        'USER': 'developer',
+        'PASSWORD': 'mati123$',
+        'HOST': '89.223.127.66',
+        'PORT': '5432',
     },
     'test': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME'),
+        'NAME': 'barbers',
         'OPTIONS': {
             'options': '-c search_path=main,public'
         },
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-    },
+        'USER': 'developer',
+        'PASSWORD': 'mati123$',
+        'HOST': '89.223.127.66',
+        'PORT': '5432',
+    }
 }
 
 
@@ -147,8 +147,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
      'DATETIME_FORMAT': "%H:%M",
-     #'DEFAULT_RENDERER_CLASSES': [
-     #   'rest_framework.renderers.JSONRenderer',
-     #   ],
-     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+     'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer'
+     ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
 }

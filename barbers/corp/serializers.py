@@ -4,12 +4,15 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
 
 from .models import Staff, Appointment, Barbershop, Position, Client, Service, MasterService
-from .templates import phonenumber_to_show
+from .templates import phonenumber_to_show, phonenumber_to_db
+
 
 class BarbershopSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='pk')
     class Meta:
         model = Barbershop
         fields = ['id', 'city', 'street']
+        read_only_fields = ['city', 'street']
 
 class StaffSerializerForInfo(serializers.ModelSerializer):
     class Meta:
@@ -83,7 +86,6 @@ class StaffSerializer(serializers.ModelSerializer):
     services = serializers.SerializerMethodField()
     barbershop = BarbershopSerializer()
     position = serializers.CharField(source='position.position')
-    phone = serializers.SerializerMethodField()
     class Meta:
         model = Staff
         fields = ['id', 'barbershop', 'name', 'surname', 'patronymic', 'position', 'phone', 'mail', 'services']
@@ -94,8 +96,50 @@ class StaffSerializer(serializers.ModelSerializer):
             serializer = MasterServiceSerializerForService(master_services, many=True)
             return serializer.data
 
-    def get_phone(self, obj):
-        return phonenumber_to_show(obj.phone)
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data['phone'] = phonenumber_to_show(data['phone'])
+        return data
+
+    def create(self, validated_data):
+        barbershop = validated_data.pop('barbershop', None)
+        if 'pk' in barbershop:
+            validated_data['barbershop'] = Barbershop.objects.get(pk=barbershop['pk'])
+
+        validated_data['position'] = Position.objects.get(position=validated_data['position']['position'])
+
+        return Staff.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        barbershop = validated_data.pop('barbershop', None)
+        if barbershop:
+            instance.barbershop = Barbershop.objects.get(pk=barbershop['pk'])
+        position = validated_data.pop('position', None)
+        if position:
+            instance.position = Position.objects.get(position=position['position'])
+
+        name = validated_data.pop('name', None)
+        if name is not None:
+            instance.name = name
+        surname = validated_data.pop('surname', None)
+        if surname is not None:
+            instance.surname = surname
+        patronymic = validated_data.pop('patronymic', None)
+        if patronymic is not None:
+            instance.patronymic = patronymic
+        mail = validated_data.pop('mail', None)
+        if mail is not None:
+            instance.mail = mail
+        phone = validated_data.pop('phone', None)
+        if phone is not None:
+            instance.phone = phone
+
+        instance.save()
+        return instance
+
+
+
+
 
 class MasterServiceSerializerForService(serializers.ModelSerializer):
     service = ServiceSerializerForInfo()

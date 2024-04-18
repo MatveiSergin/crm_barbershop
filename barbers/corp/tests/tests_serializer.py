@@ -86,15 +86,19 @@ class Test_appointment_detail_serializer(TestCase):
         serializer_data = Appointment_detail_serializer([ap1, ap2], many=True).data
         data = [
             {
+                "id": 1,
                 "service": {
+                    "id": 1,
                     "name": "Service name",
                     "price": 500
                 },
                 "staff": {
+                    "id": 1,
                     "name": "Staff_name",
                     "surname": "Staff_surname"
                 },
                 "client": {
+                    "id": 1,
                     "name": "ClientName",
                     "surname": "ClientSurname",
                     "phone": "+7 (888) 888-88-88"
@@ -103,15 +107,19 @@ class Test_appointment_detail_serializer(TestCase):
                 "end_time": "17:00"
             },
             {
+                "id": 2,
                 "service": {
+                    "id": 2,
                     "name": "Service name2",
                     "price": 1000
                 },
                 "staff": {
+                    "id": 1,
                     "name": "Staff_name",
                     "surname": "Staff_surname"
                 },
                 "client": {
+                    "id": 1,
                     "name": "ClientName",
                     "surname": "ClientSurname",
                     "phone": "+7 (888) 888-88-88"
@@ -217,12 +225,14 @@ class Test_staff_serializer(TestCase):
                 "services": [
                     {
                         "service": {
+                            "id": 1,
                             "name": "Service_name1",
                             "price": 300,
                         }
                     },
                     {
                         "service": {
+                            "id": 2,
                             "name": "Service_name2",
                             "price": 3000,
                         }
