@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 import os
@@ -42,11 +42,14 @@ INSTALLED_APPS = [
     'corp.apps.CorpConfig',
     'rest_framework',
     'django_filters',
+    'users',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -146,9 +149,18 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-     'DATETIME_FORMAT': "%H:%M",
+    'DATETIME_FORMAT': "%H:%M",
      #'DEFAULT_RENDERER_CLASSES': [
      #   'rest_framework.renderers.JSONRenderer',
      #   ],
-     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend']
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+         'barbers.authentication.JWTAuthenticationFromPyJWT',
+     ),
 }
+
+AUTH_USER_MODEL = "users.User"
+LOGIN_URL = "http://127.0.0.1:8000/api/v1/users/login"
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True

@@ -1,10 +1,14 @@
 from datetime import date, datetime, time
-
 import datetime
 
+import jwt
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import filters, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.generics import ListCreateAPIView, ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
@@ -23,8 +27,20 @@ class AppointmentViewSet(ModelViewSet):
     serializer_class = Appointment_detail_serializer
     filter_backends = [filters.OrderingFilter]
     error_message = 'Order has not been created.'
+    #permission_classes = [IsAuthenticated]
     #ordering_fields = ['start_time']
     def list(self, request, *args, **kwargs):
+        jwt_token = request.COOKIES.get('jwt')
+        if not jwt_token:
+            raise AuthenticationFailed('Unauthenticated')
+        try:
+            payload = jwt.decode(jwt_token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            return AuthenticationFailed('Unauthenticated')
+        user = get_user_model().objects.filter(id=payload['id']).first()
+        if not user:
+            return AuthenticationFailed('Unauthenticated')
+        login(request, user)
         if 'date' in request.query_params:
             query_date = map(int, request.query_params.get('date').split("-"))
             queryset = Appointment.objects.filter(data__date=date(
@@ -73,7 +89,7 @@ class AppointmentViewSet(ModelViewSet):
         else:
             return Response({'error': f'{self.error_message}'}, status=status.HTTP_400_BAD_REQUEST)
 
-class ServiceViewSet(ModelViewSet):
+class ServiceViewSet(LoginRequiredMixin, ModelViewSet):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
 
@@ -104,7 +120,7 @@ class ServiceViewSet(ModelViewSet):
 
         return super().update(self, request, *args, **kwargs)
 
-class StaffVeiwSet(ModelViewSet):
+class StaffVeiwSet(LoginRequiredMixin, ModelViewSet):
     queryset = Staff.objects.all()
     serializer_class = StaffSerializer
     filterset_fields = ['barbershop__city',
@@ -139,6 +155,6 @@ class FreeTimes(APIView):
         else:
             return Response({"error": "Master not found"})
 
-class MasterServiceAPI(ModelViewSet):
+class MasterServiceAPI(LoginRequiredMixin, ModelViewSet):
     queryset = MasterService.objects.all()
     serializer_class = MasterServiceSerializer
