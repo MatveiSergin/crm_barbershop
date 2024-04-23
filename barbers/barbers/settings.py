@@ -157,6 +157,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
          'barbers.authentication.JWTAuthenticationFromPyJWT',
      ),
+    'DEFAULT_PERMISSION_CLASSES': [
+    ]
 }
 
 AUTH_USER_MODEL = "users.User"

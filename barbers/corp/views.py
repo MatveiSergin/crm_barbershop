@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from django.core.exceptions import ObjectDoesNotExist
 
+from barbers.permissions import IsManager, IsManagerOrReadOnly, IsManagerOrIsOwner
 from .config import START_WORKING, END_WORKING
 from .models import Staff, Appointment, Service, Client, MasterService, Position, Barbershop
 from .serializers import StaffSerializer, Appointment_detail_serializer, ServiceSerializer, FreeTimeSerializer, \
@@ -27,20 +28,9 @@ class AppointmentViewSet(ModelViewSet):
     serializer_class = Appointment_detail_serializer
     filter_backends = [filters.OrderingFilter]
     error_message = 'Order has not been created.'
-    #permission_classes = [IsAuthenticated]
+    permission_classes = (IsManagerOrReadOnly, )
     #ordering_fields = ['start_time']
     def list(self, request, *args, **kwargs):
-        jwt_token = request.COOKIES.get('jwt')
-        if not jwt_token:
-            raise AuthenticationFailed('Unauthenticated')
-        try:
-            payload = jwt.decode(jwt_token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            return AuthenticationFailed('Unauthenticated')
-        user = get_user_model().objects.filter(id=payload['id']).first()
-        if not user:
-            return AuthenticationFailed('Unauthenticated')
-        login(request, user)
         if 'date' in request.query_params:
             query_date = map(int, request.query_params.get('date').split("-"))
             queryset = Appointment.objects.filter(data__date=date(
@@ -92,7 +82,7 @@ class AppointmentViewSet(ModelViewSet):
 class ServiceViewSet(LoginRequiredMixin, ModelViewSet):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
-
+    permission_classes = (IsManagerOrReadOnly,)
     def create(self, request, *args, **kwargs):
         self.data = request.data
         same_services = Service.objects.filter(name=self.data.get('name'))
@@ -122,6 +112,7 @@ class ServiceViewSet(LoginRequiredMixin, ModelViewSet):
 
 class StaffVeiwSet(LoginRequiredMixin, ModelViewSet):
     queryset = Staff.objects.all()
+    permission_classes = (IsManagerOrIsOwner, )
     serializer_class = StaffSerializer
     filterset_fields = ['barbershop__city',
                         'barbershop__street',
@@ -131,6 +122,7 @@ class StaffVeiwSet(LoginRequiredMixin, ModelViewSet):
                         'surname']
 
 class FreeTimes(APIView):
+    permission_classes = (IsManager, )
     def get(self, request):
         if not 'master_id' in request.query_params and 'date' in request.query_params:
             return Response({'error': 'Missing parameters'})

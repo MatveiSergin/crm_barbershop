@@ -18,12 +18,7 @@ class BarbershopSerializer(serializers.ModelSerializer):
 class StaffSerializerForInfo(serializers.ModelSerializer):
     class Meta:
         model = Staff
-
-
         fields = ['id', 'name', 'surname']
-
-
-
 
 class Client_for_appointment_serializer(serializers.ModelSerializer):
     class Meta:

@@ -5,7 +5,7 @@ import jwt
 
 class JWTAuthenticationFromPyJWT(BaseAuthentication):
     def authenticate(self, request):
-        if request.path in ('/api/v1/users/login'):
+        if request.path in ('/api/v1/users/login', '/api/v1/users/register'):
             return None
         token = request.COOKIES.get('jwt')
         if not token:
