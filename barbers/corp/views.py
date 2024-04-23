@@ -44,7 +44,7 @@ class AppointmentViewSet(ModelViewSet):
         if serializer.data:
             return Response(serializer.data)
         else:
-            return Response({"error": "No appointment"})
+            return Response({"detail": "No appointment"}, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request, *args, **kwargs):
         self.validator = AppointmentValidator()
@@ -52,7 +52,7 @@ class AppointmentViewSet(ModelViewSet):
         self.validator.validate(self.data)
 
         if not self.validator.is_valid():
-            return Response({"error": f"{self.error_message, self.validator.error}"})
+            return Response({"detail": f"{self.error_message, self.validator.error}"}, status=status.HTTP_400_BAD_REQUEST)
 
         valid_data = self.validator.get_validating_data()
         serializer_data = {
@@ -77,7 +77,7 @@ class AppointmentViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response({'error': f'{self.error_message}'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': f'{self.error_message}'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ServiceViewSet(LoginRequiredMixin, ModelViewSet):
     queryset = Service.objects.all()
@@ -88,7 +88,7 @@ class ServiceViewSet(LoginRequiredMixin, ModelViewSet):
         same_services = Service.objects.filter(name=self.data.get('name'))
 
         if same_services:
-           return Response({'error': 'Service with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
+           return Response({'detail': 'Service with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = ServiceSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -100,13 +100,13 @@ class ServiceViewSet(LoginRequiredMixin, ModelViewSet):
         id_service = kwargs['pk']
         old_services = Service.objects.filter(id=id_service)
         if not old_services:
-            return Response({'error': 'The service does not exist'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'The service does not exist'}, status=status.HTTP_404_NOT_FOUND)
         old_service = old_services[0]
 
         if old_service.name != self.data.get('name', None):
             same_services = Service.objects.filter(name=self.data.get('name'))
             if same_services:
-                return Response({'error': 'Service with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'detail': 'Service with this name already exists'}, status=status.HTTP_400_BAD_REQUEST)
 
         return super().update(self, request, *args, **kwargs)
 
@@ -125,12 +125,12 @@ class FreeTimes(APIView):
     permission_classes = (IsManager, )
     def get(self, request):
         if not 'master_id' in request.query_params and 'date' in request.query_params:
-            return Response({'error': 'Missing parameters'})
+            return Response({'detail': 'Missing parameters'}, status=status.HTTP_400_BAD_REQUEST)
 
         master_id = request.query_params.get('master_id')
 
         if not Staff.objects.filter(id=master_id):
-            return Response({"error": "Master not found"})
+            return Response({"detail": "Master not found"}, status=status.HTTP_400_BAD_REQUEST)
 
         query_date = map(int, request.query_params.get('date').split("-"))
         queryset = Appointment.objects.filter(data__date=date(
@@ -145,7 +145,7 @@ class FreeTimes(APIView):
         if times_for_serializer:
             return Response({'times': sorted(times_for_serializer['times'])})
         else:
-            return Response({"error": "Master not found"})
+            return Response({"detail": "Master not found"}, status=status.HTTP_400_BAD_REQUEST)
 
 class MasterServiceAPI(LoginRequiredMixin, ModelViewSet):
     queryset = MasterService.objects.all()
