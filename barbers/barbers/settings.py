@@ -96,9 +96,6 @@ DATABASES = {
     'test': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME'),
-        'OPTIONS': {
-            'options': '-c search_path=main,public'
-        },
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
         'HOST': os.getenv('DB_HOST'),
@@ -163,6 +160,5 @@ REST_FRAMEWORK = {
 
 AUTH_USER_MODEL = "users.User"
 LOGIN_URL = "http://127.0.0.1:8000/api/v1/users/login"
-
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True

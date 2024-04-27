@@ -9,19 +9,10 @@ from corp.serializers import Appointment_detail_serializer, StaffSerializer, Mas
 
 
 class Test_appointment_detail_serializer(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
 
-        with connection.schema_editor() as schema_editor:
-            schema_editor.create_model(Appointment)
-            schema_editor.create_model(Client)
-            schema_editor.create_model(Service)
-            schema_editor.create_model(Barbershop)
-            schema_editor.create_model(Staff)
-            schema_editor.create_model(Position)
+    def setUp(self):
 
-        barbershop = Barbershop.objects.create(
+        self.barbershop = Barbershop.objects.create(
             region='Московская область',
             city='Москва',
             street='Оршанская',
@@ -31,30 +22,30 @@ class Test_appointment_detail_serializer(TestCase):
             phone=9612345678,
         )
 
-        position = Position.objects.create(
+        self.position = Position.objects.create(
             position='barber'
         )
-        staff = Staff.objects.create(
+        self.staff = Staff.objects.create(
             name='Staff_name',
             surname='Staff_surname',
             patronymic='Staff_patronymic',
             mail='matvei.sergin2016@yandex.ru',
-            position=position,
-            barbershop=barbershop,
+            position=self.position,
+            barbershop=self.barbershop,
             phone=9998887766,
         )
-        client = Client.objects.create(
+        self.client = Client.objects.create(
             name='ClientName',
             surname='ClientSurname',
             mail='matvei.sergin2016@yandex.ru',
             phone=8888888888,
         )
-        service1 = Service.objects.create(
+        self.service1 = Service.objects.create(
             price=500,
             name='Service name',
             description='Service description',
         )
-        service2 = Service.objects.create(
+        self.service2 = Service.objects.create(
             price=1000,
             name='Service name2',
             description='Service description2',
@@ -68,37 +59,36 @@ class Test_appointment_detail_serializer(TestCase):
         appointment_time2 = time(hour=10, minute=0)
         appointment_datetime2 = datetime.combine(appointment_date2, appointment_time2)
 
-        appointment1 = Appointment.objects.create(
-            staff=staff,
-            client=client,
-            service=service1,
+        self.appointment1 = Appointment.objects.create(
+            staff=self.staff,
+            client=self.client,
+            service=self.service1,
             data=appointment_datetime1,
         )
-        appointment2 = Appointment.objects.create(
-            staff=staff,
-            client=client,
-            service=service2,
+        self.appointment2 = Appointment.objects.create(
+            staff=self.staff,
+            client=self.client,
+            service=self.service2,
             data=appointment_datetime2,
         )
     def test_data(self):
-        ap1 = Appointment.objects.get(id=1)
-        ap2 = Appointment.objects.get(id=2)
-        serializer_data = Appointment_detail_serializer([ap1, ap2], many=True).data
+        appointments = [self.appointment1, self.appointment2]
+        serializer_data = Appointment_detail_serializer(appointments, many=True).data
         data = [
             {
-                "id": 1,
+                "id": self.appointment1.pk,
                 "service": {
-                    "id": 1,
+                    "id": self.service1.pk,
                     "name": "Service name",
                     "price": 500
                 },
                 "staff": {
-                    "id": 1,
+                    "id": self.staff.pk,
                     "name": "Staff_name",
                     "surname": "Staff_surname"
                 },
                 "client": {
-                    "id": 1,
+                    "id": self.client.pk,
                     "name": "ClientName",
                     "surname": "ClientSurname",
                     "phone": "+7 (888) 888-88-88"
@@ -107,19 +97,19 @@ class Test_appointment_detail_serializer(TestCase):
                 "end_time": "17:00"
             },
             {
-                "id": 2,
+                "id": self.appointment2.pk,
                 "service": {
-                    "id": 2,
+                    "id": self.service2.pk,
                     "name": "Service name2",
                     "price": 1000
                 },
                 "staff": {
-                    "id": 1,
+                    "id": self.staff.pk,
                     "name": "Staff_name",
                     "surname": "Staff_surname"
                 },
                 "client": {
-                    "id": 1,
+                    "id": self.client.pk,
                     "name": "ClientName",
                     "surname": "ClientSurname",
                     "phone": "+7 (888) 888-88-88"
@@ -133,17 +123,10 @@ class Test_appointment_detail_serializer(TestCase):
 
 
 class Test_staff_serializer(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        with connection.schema_editor() as schema_editor:
-            schema_editor.create_model(Barbershop)
-            schema_editor.create_model(Staff)
-            schema_editor.create_model(Position)
-            schema_editor.create_model(MasterService)
-            schema_editor.create_model(Service)
 
-        barbershop = Barbershop.objects.create(
+    def setUp(self):
+
+        self.barbershop = Barbershop.objects.create(
             region='Московская область',
             city='Москва',
             street='Оршанская',
@@ -153,66 +136,65 @@ class Test_staff_serializer(TestCase):
             phone=9612345678,
         )
 
-        position1 = Position.objects.create(
+        self.position1 = Position.objects.create(
             position='barber',
             has_accept_appointments=True
         )
 
-        position2 = Position.objects.create(
+        self.position2 = Position.objects.create(
             position='menedjer'
         )
 
-        staff1 = Staff.objects.create(
+        self.staff1 = Staff.objects.create(
             name='Staff_name',
             surname='Staff_surname',
             patronymic='Staff_patronymic',
             mail='employee1@yandex.ru',
-            position=position1,
-            barbershop=barbershop,
+            position=self.position1,
+            barbershop=self.barbershop,
             phone=9998887766,
         )
 
-        Staff.objects.create(
+        self.staff2 = Staff.objects.create(
             name='Staff_name2',
             surname='Staff_surname2',
             patronymic='Staff_patronymic2',
             mail='employee2@yandex.ru',
-            position=position2,
-            barbershop=barbershop,
+            position=self.position2,
+            barbershop=self.barbershop,
             phone=9998487599,
         )
 
-        service1 = Service.objects.create(
+        self.service1 = Service.objects.create(
             name='Service_name1',
             price=300,
             description='Service_description1'
         )
 
-        service2 = Service.objects.create(
+        self.service2 = Service.objects.create(
             name='Service_name2',
             price=3000,
             description='Service_description2'
         )
 
-        MasterService.objects.create(
-            staff=staff1,
-            service=service1
+        self.master_service1 = MasterService.objects.create(
+            staff=self.staff1,
+            service=self.service1
         )
 
-        MasterService.objects.create(
-            staff=staff1,
-            service=service2
+        self.master_service2 = MasterService.objects.create(
+            staff=self.staff1,
+            service=self.service2
         )
 
     def test_data(self):
-        first_employee = Staff.objects.get(id=1)
-        second_employee = Staff.objects.get(id=2)
-        serializer_data = StaffSerializer([first_employee, second_employee], many=True).data
+        staffs = [self.staff1, self.staff2]
+        serializer_data = StaffSerializer(staffs, many=True).data
         data = [
             {
-                "id": 1,
+                "id": self.staff1.pk,
                 "barbershop": {
-                    "id": 1,
+                    "id": self.barbershop.pk,
                     "city": "Москва",
                     "street": "Оршанская"
                 },
@@ -225,14 +207,14 @@ class Test_staff_serializer(TestCase):
                 "services": [
                     {
                         "service": {
-                            "id": 1,
+                            "id": self.service1.pk,
                             "name": "Service_name1",
                             "price": 300,
                         }
                     },
                     {
                         "service": {
-                            "id": 2,
+                            "id": self.service2.pk,
                             "name": "Service_name2",
                             "price": 3000,
                         }
@@ -240,9 +222,9 @@ class Test_staff_serializer(TestCase):
                 ]
             },
             {
-                "id": 2,
+                "id": self.staff2.pk,
                 "barbershop": {
-                    "id": 1,
+                    "id": self.barbershop.pk,
                     "city": "Москва",
                     "street": "Оршанская"
                 },
@@ -259,17 +241,10 @@ class Test_staff_serializer(TestCase):
         self.assertEqual(serializer_data, data)
 
 class TestMasterServiceSerializer(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        super().setUpTestData()
-        with connection.schema_editor() as schema_editor:
-            schema_editor.create_model(Barbershop)
-            schema_editor.create_model(Staff)
-            schema_editor.create_model(Position)
-            schema_editor.create_model(MasterService)
-            schema_editor.create_model(Service)
 
-        barbershop = Barbershop.objects.create(
+    def setUp(self):
+
+        self.barbershop = Barbershop.objects.create(
             region='Московская область',
             city='Москва',
             street='Оршанская',
@@ -279,73 +254,71 @@ class TestMasterServiceSerializer(TestCase):
             phone=9612345678,
         )
 
-        position1 = Position.objects.create(
+        self.position1 = Position.objects.create(
             position='barber',
             has_accept_appointments=True
         )
 
-        position2 = Position.objects.create(
+        self.position2 = Position.objects.create(
             position='menedjer'
         )
 
-        staff1 = Staff.objects.create(
+        self.staff1 = Staff.objects.create(
             name='Staff_name',
             surname='Staff_surname',
             patronymic='Staff_patronymic',
             mail='employee1@yandex.ru',
-            position=position1,
-            barbershop=barbershop,
+            position=self.position1,
+            barbershop=self.barbershop,
             phone=9998887766,
         )
 
-        Staff.objects.create(
+        self.staff2 = Staff.objects.create(
             name='Staff_name2',
             surname='Staff_surname2',
             patronymic='Staff_patronymic2',
             mail='employee2@yandex.ru',
-            position=position2,
-            barbershop=barbershop,
+            position=self.position2,
+            barbershop=self.barbershop,
             phone=9998487599,
         )
 
-        service1 = Service.objects.create(
+        self.service1 = Service.objects.create(
             name='Service_name1',
             price=300,
             description='Service_description1'
         )
 
-        service2 = Service.objects.create(
+        self.service2 = Service.objects.create(
             name='Service_name2',
             price=3000,
             description='Service_description2'
         )
 
-        MasterService.objects.create(
-            staff=staff1,
-            service=service1
+        self.master_service1 = MasterService.objects.create(
+            staff=self.staff1,
+            service=self.service1
         )
 
-        MasterService.objects.create(
-            staff=staff1,
-            service=service2
+        self.master_service2 = MasterService.objects.create(
+            staff=self.staff1,
+            service=self.service2
         )
 
     def test_data(self):
-        master_service1 = MasterService.objects.get(id=1)
-        master_service2 = MasterService.objects.get(id=2)
-
-        serializer_data = MasterServiceSerializer([master_service1, master_service2], many=True).data
+        master_services = [self.master_service1, self.master_service2]
+        serializer_data = MasterServiceSerializer(master_services, many=True).data
 
         result_data = [
             {
-                "id": 1,
-                "staff": 1,
-                "service": 1
+                "id": self.master_service1.pk,
+                "staff": self.staff1.pk,
+                "service": self.service1.pk
             },
             {
-                "id": 2,
-                "staff": 1,
-                "service": 2
+                "id": self.master_service2.pk,
+                "staff": self.staff1.pk,
+                "service": self.service2.pk
             }
         ]
         self.assertEqual(serializer_data, result_data)

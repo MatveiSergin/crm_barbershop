@@ -24,10 +24,10 @@ class IsManagerOrReadOnly(permissions.BasePermission):
 class IsManagerOrIsOwner(permissions.BasePermission):
     group_name = "Manager"
     def has_object_permission(self, request, view, obj):
-        if request.method == "DELETE":
+        if request.method == "DELETE" and not user_in_group(request.user, self.group_name):
             return False
         try:
-            return request.user.staff == obj
+            return request.user.staff == obj or user_in_group(request.user, self.group_name)
         except AttributeError:
             return False
 
