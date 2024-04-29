@@ -94,7 +94,9 @@ class TestAppointmentAPI(APITestCase):
         self.group.user_set.add(self.user)
 
     def test_get_for_first_date(self):
-        url = 'http://127.0.0.1:8000/api/v1/appointments/?date=2024-03-19'
+        appointments_url = reverse('appointments-list')
+        date_param = '2024-03-19'
+        url = f'{appointments_url}?date={date_param}'
         self.client.force_authenticate(self.user)
         response = self.client.get(url)
         response_date = map(int, response.wsgi_request.GET['date'].split("-"))
@@ -103,18 +105,18 @@ class TestAppointmentAPI(APITestCase):
         self.assertEqual(response.data, serializer_data)
 
     def test_get_for_second_date(self):
-        url = 'http://127.0.0.1:8000/api/v1/appointments/?date=2024-03-18'
+        appointments_url = reverse('appointments-list')
+        date_param = '2024-03-19'
+        url = f'{appointments_url}?date={date_param}'
         self.client.force_authenticate(self.user)
         response = self.client.get(url)
         response_date = map(int, response.wsgi_request.GET['date'].split("-"))
-        appointments = Appointment.objects.filter(
-            data__date=date(next(response_date), next(response_date), next(response_date)))
+        appointments = Appointment.objects.filter(data__date=date(*response_date))
         serializer_data = Appointment_detail_serializer(appointments, many=True).data
         self.assertEqual(response.data, serializer_data)
 
     def test_get_without_date(self):
-        #url = 'http://127.0.0.1:8000/api/v1/appointment/'
-        url = 'http://127.0.0.1:8000/api/v1/appointments/'
+        url = reverse('appointments-list')
         self.client.force_authenticate(self.user)
         response = self.client.get(url)
         appointments = Appointment.objects.all()
@@ -122,7 +124,7 @@ class TestAppointmentAPI(APITestCase):
         self.assertEqual(response.data, serializer_data)
 
     def test_post_create_when_no_appointments_this_day(self):
-        url = 'http://127.0.0.1:8000/api/v1/appointments/'
+        url = reverse('appointments-list')
         data = {
             "data": "2024-03-18T17:00",
             "service": {
@@ -170,7 +172,7 @@ class TestAppointmentAPI(APITestCase):
         self.assertEqual(response.data, result_data)
 
     def test_post_when_time_is_busy(self):
-        url = 'http://127.0.0.1:8000/api/v1/appointments/'
+        url = reverse('appointments-list')
         data = {
             "data": "2024-03-18T16:40",
             "service": {
@@ -258,7 +260,7 @@ class TestServiceAPI(APITestCase):
         self.token = jwt.encode(payload=payload, key='secret', algorithm='HS256')
 
     def test_get(self):
-        url = 'http://127.0.0.1:8000/api/v1/services/'
+        url = reverse('services-list')
         self.client.cookies['jwt'] = self.token
         self.client.force_login(user=self.user)
         response = self.client.get(url)
@@ -267,7 +269,7 @@ class TestServiceAPI(APITestCase):
         self.assertEqual(response.data, result_data)
 
     def test_post_when_service_already_exists(self):
-        url = 'http://127.0.0.1:8000/api/v1/services/'
+        url = reverse('services-list')
         same_service = self.service1
         data = ServiceSerializer(same_service).data
         self.client.cookies['jwt'] = self.token
@@ -280,7 +282,7 @@ class TestServiceAPI(APITestCase):
 
 
     def test_post_add_new_service(self):
-        url = 'http://127.0.0.1:8000/api/v1/services/'
+        url = reverse('services-list')
         new_service = {
             'name': 'Service_3',
             'price': 100,
@@ -296,7 +298,7 @@ class TestServiceAPI(APITestCase):
         self.assertEqual(Service.objects.all().count(), 3)
 
     def test_put_when_service_already_exists(self):
-        url = f'http://127.0.0.1:8000/api/v1/services/{self.service1.pk}/'
+        url = reverse('services-detail', kwargs={'pk': self.service1.pk})
         service_data = ServiceSerializer(self.service1).data
         service_data['price'] = 1000
         self.client.cookies['jwt'] = self.token
@@ -308,7 +310,7 @@ class TestServiceAPI(APITestCase):
 
     def test_put_when_service_does_not_exist(self):
         service_id_not_exists = self.service2.pk + 1
-        url = f'http://127.0.0.1:8000/api/v1/services/{service_id_not_exists}/'
+        url = reverse('services-detail', kwargs={'pk': service_id_not_exists})
         service_data = {
             'name': 'Service name',
             'price': 1000,
@@ -321,7 +323,8 @@ class TestServiceAPI(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_put_when_new_service_name_already_exists(self):
-        url = f'http://127.0.0.1:8000/api/v1/services/{self.service1.pk}/'
+        url = reverse('services-detail', kwargs={'pk': self.service1.pk})
+
         service_data = ServiceSerializer(self.service1).data
         service_data['name'] = 'Service name2'
 
@@ -333,7 +336,7 @@ class TestServiceAPI(APITestCase):
         self.assertEqual(response.data, result_data)
 
     def test_delete(self):
-        url = f'http://127.0.0.1:8000/api/v1/services/{self.service1.pk}/'
+        url = reverse('services-detail', kwargs={'pk': self.service1.pk})
         self.client.cookies['jwt'] = self.token
         self.client.force_login(self.user)
         response = self.client.delete(path=url, format='json')
@@ -341,7 +344,7 @@ class TestServiceAPI(APITestCase):
 
     def test_delete_when_service_does_not_exist(self):
         service_id_not_exists = self.service2.pk + 1
-        url = f'http://127.0.0.1:8000/api/v1/services/{service_id_not_exists}/'
+        url = reverse('services-detail', kwargs={'pk': service_id_not_exists})
         self.client.cookies['jwt'] = self.token
         self.client.force_login(self.user)
         response = self.client.delete(path=url, format='json')
@@ -428,7 +431,7 @@ class TestStaffAPI(APITestCase):
         self.token = jwt.encode(payload=payload, key='secret', algorithm='HS256')
 
     def test_get(self):
-        url = "http://127.0.0.1:8000/api/v1/staff/"
+        url = reverse('staff-list')
         staffs = [self.staff1, self.staff2]
         serializer_data = StaffSerializer(staffs, many=True).data
         self.client.cookies['jwt'] = self.token
@@ -437,7 +440,7 @@ class TestStaffAPI(APITestCase):
         self.assertEqual(response.data, serializer_data)
 
     def test_post(self):
-        url = f"http://127.0.0.1:8000/api/v1/staff/"
+        url = reverse('staff-list')
 
         data = {
             "barbershop": {
@@ -475,8 +478,7 @@ class TestStaffAPI(APITestCase):
         self.assertDictEqual(response.data, result_data)
 
     def test_patch(self):
-        url = f"http://127.0.0.1:8000/api/v1/staff/{self.staff1.pk}/"
-
+        url = reverse('staff-detail', kwargs={'pk': self.staff1.pk})
         data = {
             "surname": "new_Staff_surname"
         }
@@ -571,7 +573,7 @@ class TestMasterServiceAPI(APITestCase):
         self.token = jwt.encode(payload=payload, key='secret', algorithm='HS256')
 
     def test_get(self):
-        url = 'http://127.0.0.1:8000/api/v1/master_services/'
+        url = reverse('master_services-list')
         master_services = [self.master_service1, self.master_service2]
         self.client.cookies['jwt'] = self.token
         self.client.force_login(self.user)
@@ -582,7 +584,7 @@ class TestMasterServiceAPI(APITestCase):
         self.assertEqual(response.data, result_data)
 
     def test_post(self):
-        url = 'http://127.0.0.1:8000/api/v1/master_services/'
+        url = reverse('master_services-list')
 
         data = {
             "staff": Staff.objects.all().last().pk - 1,
@@ -602,8 +604,7 @@ class TestMasterServiceAPI(APITestCase):
         self.assertEqual(response.data, result_data)
 
     def test_put_and_patch(self):
-        url = f'http://127.0.0.1:8000/api/v1/master_services/{self.master_service1.pk}/'
-
+        url = reverse('master_services-detail', kwargs={'pk': self.master_service1.pk})
         data = {
             "staff": Staff.objects.all().last().pk,
             "service": Service.objects.all().last().pk
@@ -687,7 +688,8 @@ class TestFreeTime(APITestCase):
         self.token = jwt.encode(payload=payload, key='secret', algorithm='HS256')
 
     def test_get_free_times(self):
-        url = f"http://127.0.0.1:8000/api/v1/FreeTimes?master_id={self.staff.pk}&date={self.appointment_datetime.strftime("%Y-%m-%d")}"
+        free_times_url = reverse('FreeTimes')
+        url = f"{free_times_url}?master_id={self.staff.pk}&date={self.appointment_datetime.strftime("%Y-%m-%d")}"
         self.client.force_authenticate(user=self.user)
         response = self.client.get(url)
         result_data = {'times': ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30']}

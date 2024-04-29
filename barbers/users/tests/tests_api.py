@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.models import Group
+from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
 from corp.models import Barbershop, Position, Staff
@@ -25,7 +26,7 @@ class TestsRegisterAPI(APITestCase):
         self.group = Group.objects.create(name='Manager')
 
     def tests_register(self):
-        url = "http://127.0.0.1:8000/api/v1/users/register"
+        url = reverse('register')
         test_request = {
             "barbershop": {
                 "id": self.barbershop.id
@@ -48,7 +49,7 @@ class TestsRegisterAPI(APITestCase):
         self.assertEqual(response.data, result_data)
 
     def test_register_when_user_exists(self):
-        url = "http://127.0.0.1:8000/api/v1/users/register"
+        url = reverse('register')
 
         Staff.objects.create(
             name='Никита',
@@ -118,7 +119,7 @@ class TestLoginAPI(APITestCase):
         self.group = Group.objects.create(name='Manager')
         self.group.user_set.add(self.user)
     def test_login(self):
-        url = "http://127.0.0.1:8000/api/v1/users/login"
+        url = reverse('login')
         data = {
             "email": self.staff.mail,
             "password": self.password

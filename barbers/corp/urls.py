@@ -11,5 +11,5 @@ router.register(r'master_services', MasterServiceAPI, basename='master_services'
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('FreeTimes', FreeTimes.as_view()) #http://127.0.0.1:8000/api/v1/FreeTimes/
+    path('FreeTimes', FreeTimes.as_view(), name='FreeTimes') #http://127.0.0.1:8000/api/v1/FreeTimes/
 ]
