@@ -4,8 +4,9 @@ from rest_framework.exceptions import AuthenticationFailed
 import jwt
 
 class JWTAuthenticationFromPyJWT(BaseAuthentication):
+    SAFE_URLS = ('/api/v1/users/login', '/api/v1/users/register')
     def authenticate(self, request):
-        if request.path in ('/api/v1/users/login', '/api/v1/users/register'):
+        if request.path in self.SAFE_URLS:
             return None
         token = request.COOKIES.get('jwt')
         if not token:

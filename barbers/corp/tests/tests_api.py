@@ -615,3 +615,81 @@ class TestMasterServiceAPI(APITestCase):
 
         self.assertEqual(response1.status_code, response2.status_code)
         self.assertEqual(response1.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+class TestFreeTime(APITestCase):
+    def setUp(self):
+        self.barbershop = Barbershop.objects.create(
+            region='Московская область',
+            city='Москва',
+            street='Оршанская',
+            house='4',
+            postal_code=121552,
+            mail='orsknka228@mai.com',
+            phone=9612345678,
+        )
+
+        self.position = Position.objects.create(
+            position='barber',
+            has_accept_appointments=True
+        )
+
+        self.staff = Staff.objects.create(
+            name='Staff_name',
+            surname='Staff_surname',
+            patronymic='Staff_patronymic',
+            mail='matvei.sergin2016@yandex.ru',
+            position=self.position,
+            barbershop=self.barbershop,
+            phone=9998887766,
+        )
+
+        self.service = Service.objects.create(
+            price=1000,
+            name='Service name',
+            description='Service description',
+        )
+
+        self.customers = Client.objects.create(
+            name='ClientName',
+            surname='ClientSurname',
+            mail='matvei.sergin2016@yandex.ru',
+            phone=8888888888,
+        )
+
+        self.appointment_datetime = datetime(year=2024, month=3, day=18, hour=16, minute=30)
+
+        self.appointment = Appointment.objects.create(
+            staff=self.staff,
+            client=self.customers,
+            service=self.service,
+            data=self.appointment_datetime,
+        )
+
+        self.user = get_user_model().objects.create_user(
+            username=self.staff.mail,
+            email=self.staff.mail,
+            password="password",
+            first_name=self.staff.name,
+            last_name=self.staff.surname,
+            staff=self.staff
+        )
+
+        self.group = Group.objects.create(name='Manager')
+        self.group.user_set.add(self.user)
+
+        payload = {
+            "id": self.user.id,
+            "exp": (datetime.now() + timedelta(hours=1)).timestamp(),
+            "iet": datetime.now().timestamp()
+        }
+
+        self.token = jwt.encode(payload=payload, key='secret', algorithm='HS256')
+
+    def test_get_free_times(self):
+        url = f"http://127.0.0.1:8000/api/v1/FreeTimes?master_id={self.staff.pk}&date={self.appointment_datetime.strftime("%Y-%m-%d")}"
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(url)
+        result_data = {'times': ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30']}
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, result_data)
