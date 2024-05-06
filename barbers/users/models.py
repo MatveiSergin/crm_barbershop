@@ -4,7 +4,7 @@ import jwt
 from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 
-from corp.models import Staff
+from crm.models import Staff
 
 
 class User(AbstractUser):

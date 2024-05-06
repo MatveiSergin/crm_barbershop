@@ -3,9 +3,9 @@ from datetime import datetime, date
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import ValidationError
 
-from corp.config import DURATION_OF_SERVICE, START_WORKING, END_WORKING
-from corp.models import Service, Staff, Client, MasterService, Appointment
-from corp.templates import phonenumber_to_db
+from crm.config import DURATION_OF_SERVICE, START_WORKING, END_WORKING
+from crm.models import Service, Staff, Client, MasterService, Appointment
+from crm.templates import phonenumber_to_db
 
 
 class AppointmentValidator:

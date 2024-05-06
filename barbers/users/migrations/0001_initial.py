@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('corp', '0001_initial'),
+        ('crm', '0001_initial'),
     ]
 
     operations = [
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('photo', models.ImageField(blank=True, null=True, upload_to='photos/%Y/%m/%d', verbose_name='Фотография')),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
-                ('staff', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='corp.staff', verbose_name='Информация по сотруднику')),
+                ('staff', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='crm.staff', verbose_name='Информация по сотруднику')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
             ],
             options={

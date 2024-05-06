@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corp.apps.CorpConfig',
+    'crm.apps.CorpConfig',
     'rest_framework',
     'django_filters',
     'users',

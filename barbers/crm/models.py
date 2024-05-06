@@ -3,7 +3,7 @@ import datetime
 
 from django.core.exceptions import ValidationError
 
-from corp.templates import phonenumber_to_db
+from crm.templates import phonenumber_to_db
 from django.core.validators import validate_email, EmailValidator
 
 class Appointment(models.Model):

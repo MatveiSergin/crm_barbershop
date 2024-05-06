@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model, authenticate
 from rest_framework import serializers
 
-from corp.models import Staff
-from corp.serializers import StaffSerializer, BarbershopSerializer
+from crm.models import Staff
+from crm.serializers import StaffSerializer, BarbershopSerializer
 from users.models import User
 
 class RegisterSerializer(serializers.Serializer):

@@ -6,13 +6,13 @@ from django.contrib.auth.models import Group
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.db import connection
-from corp.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
-from corp.serializers import Appointment_detail_serializer, ServiceSerializer, StaffSerializer, MasterServiceSerializer
+from crm.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
+from crm.serializers import Appointment_detail_serializer, ServiceSerializer, StaffSerializer, MasterServiceSerializer
 from datetime import datetime, timedelta
 from datetime import date
 from django.urls import reverse
 
-from corp.templates import phonenumber_to_show
+from crm.templates import phonenumber_to_show
 
 
 class TestAppointmentAPI(APITestCase):

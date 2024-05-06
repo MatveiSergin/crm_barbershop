@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.urls import reverse
 from rest_framework.test import APITestCase
 from rest_framework import status
-from corp.models import Barbershop, Position, Staff
+from crm.models import Barbershop, Position, Staff
 from users.serializers import RegisterSerializer
 
 

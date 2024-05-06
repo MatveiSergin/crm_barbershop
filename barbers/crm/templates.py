@@ -1,6 +1,6 @@
 from datetime import date, time, datetime, timedelta
 
-from corp.config import START_WORKING, END_WORKING
+from crm.config import START_WORKING, END_WORKING
 
 
 def phonenumber_to_show(value):

@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.test import TestCase
 from django.db import connection
 
-from corp.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
-from corp.serializers import Appointment_detail_serializer, StaffSerializer, MasterServiceSerializer
+from crm.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
+from crm.serializers import Appointment_detail_serializer, StaffSerializer, MasterServiceSerializer
 
 
 class Test_appointment_detail_serializer(TestCase):

@@ -2,7 +2,7 @@ from datetime import datetime, time
 
 from django.db import connection
 from django.test import TestCase
-from corp.models import Appointment, Staff, Client, Service, Barbershop, Position
+from crm.models import Appointment, Staff, Client, Service, Barbershop, Position
 from django.utils import timezone
 
 class AppointmentTest(TestCase):

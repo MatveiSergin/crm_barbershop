@@ -109,7 +109,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Documents',
             fields=[
-                ('staff', models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='corp.staff')),
+                ('staff', models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='crm.staff')),
                 ('passport', models.BigIntegerField(unique=True)),
                 ('employment_record_number', models.BigIntegerField(unique=True)),
                 ('snils', models.BigIntegerField(unique=True)),
