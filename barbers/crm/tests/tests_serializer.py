@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.db import connection
 
 from crm.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
-from crm.serializers import Appointment_detail_serializer, StaffSerializer, MasterServiceSerializer
+from crm.serializers import AppointmentDetailSerializer, StaffSerializer, MasterServiceSerializer
 
 
 class Test_appointment_detail_serializer(TestCase):
@@ -73,7 +73,7 @@ class Test_appointment_detail_serializer(TestCase):
         )
     def test_data(self):
         appointments = [self.appointment1, self.appointment2]
-        serializer_data = Appointment_detail_serializer(appointments, many=True).data
+        serializer_data = AppointmentDetailSerializer(appointments, many=True).data
         data = [
             {
                 "id": self.appointment1.pk,

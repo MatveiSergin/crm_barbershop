@@ -36,7 +36,7 @@ class ServiceSerializerForInfo(serializers.ModelSerializer):
 
 
 
-class Appointment_detail_serializer(serializers.ModelSerializer):
+class AppointmentDetailSerializer(serializers.ModelSerializer):
     service = ServiceSerializerForInfo()
     staff = StaffSerializerForInfo()
     client = Client_for_appointment_serializer()

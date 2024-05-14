@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from django.db import connection
 from crm.models import Appointment, Client, Service, Barbershop, Staff, Position, MasterService
-from crm.serializers import Appointment_detail_serializer, ServiceSerializer, StaffSerializer, MasterServiceSerializer
+from crm.serializers import AppointmentDetailSerializer, ServiceSerializer, StaffSerializer, MasterServiceSerializer
 from datetime import datetime, timedelta
 from datetime import date
 from django.urls import reverse
@@ -101,7 +101,7 @@ class TestAppointmentAPI(APITestCase):
         response = self.client.get(url)
         response_date = map(int, response.wsgi_request.GET['date'].split("-"))
         appointments = Appointment.objects.filter(data__date=date(next(response_date), next(response_date), next(response_date)))
-        serializer_data = Appointment_detail_serializer(appointments, many=True).data
+        serializer_data = AppointmentDetailSerializer(appointments, many=True).data
         self.assertEqual(response.data, serializer_data)
 
     def test_get_for_second_date(self):
@@ -112,7 +112,7 @@ class TestAppointmentAPI(APITestCase):
         response = self.client.get(url)
         response_date = map(int, response.wsgi_request.GET['date'].split("-"))
         appointments = Appointment.objects.filter(data__date=date(*response_date))
-        serializer_data = Appointment_detail_serializer(appointments, many=True).data
+        serializer_data = AppointmentDetailSerializer(appointments, many=True).data
         self.assertEqual(response.data, serializer_data)
 
     def test_get_without_date(self):
@@ -120,7 +120,7 @@ class TestAppointmentAPI(APITestCase):
         self.client.force_authenticate(self.user)
         response = self.client.get(url)
         appointments = Appointment.objects.all()
-        serializer_data = Appointment_detail_serializer(appointments, many=True).data
+        serializer_data = AppointmentDetailSerializer(appointments, many=True).data
         self.assertEqual(response.data, serializer_data)
 
     def test_post_create_when_no_appointments_this_day(self):

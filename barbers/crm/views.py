@@ -17,7 +17,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from barbers.permissions import IsManager, IsManagerOrReadOnly, IsManagerOrIsOwner
 from .config import START_WORKING, END_WORKING
 from .models import Staff, Appointment, Service, Client, MasterService, Position, Barbershop
-from .serializers import StaffSerializer, Appointment_detail_serializer, ServiceSerializer, FreeTimeSerializer, \
+from .serializers import StaffSerializer, AppointmentDetailSerializer, ServiceSerializer, FreeTimeSerializer, \
     MasterServiceSerializer
 from .templates import phonenumber_to_db, get_free_time, serialize_time_set
 from .validators import AppointmentValidator
@@ -25,7 +25,7 @@ from .validators import AppointmentValidator
 
 class AppointmentViewSet(ModelViewSet):
     queryset = Appointment.objects.all()
-    serializer_class = Appointment_detail_serializer
+    serializer_class = AppointmentDetailSerializer
     filter_backends = [filters.OrderingFilter]
     error_message = 'Order has not been created.'
     permission_classes = (IsManagerOrReadOnly, )
@@ -33,14 +33,10 @@ class AppointmentViewSet(ModelViewSet):
     def list(self, request, *args, **kwargs):
         if 'date' in request.query_params:
             query_date = map(int, request.query_params.get('date').split("-"))
-            queryset = Appointment.objects.filter(data__date=date(
-                next(query_date),
-                next(query_date),
-                next(query_date)
-            ))
+            queryset = Appointment.objects.filter(data__date=date(*query_date))
         else:
             queryset = Appointment.objects.all()
-        serializer = Appointment_detail_serializer(queryset, many=True)
+        serializer = AppointmentDetailSerializer(queryset, many=True)
         if serializer.data:
             return Response(serializer.data)
         else:
@@ -71,7 +67,7 @@ class AppointmentViewSet(ModelViewSet):
             }
         }
 
-        serializer = Appointment_detail_serializer(data=serializer_data)
+        serializer = AppointmentDetailSerializer(data=serializer_data)
 
         if serializer.is_valid(raise_exception=True):
             serializer.save()
