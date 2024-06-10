@@ -1,0 +1,52 @@
+version: '3'
+services:
+  apache:
+    build:
+      context: ./apache
+      dockerfile: Dockerfile
+    ports:
+      - '88:80'
+    volumes:
+      - ./html:/var/www/html
+      - ./html/apache_logs:/var/log/apache2
+      - ./apache/mysite.conf:/etc/apache2/conf-enabled/mysite.conf
+    depends_on:
+      - db
+    networks:
+      - myapp_network
+  db:
+    image: postgres:latest
+    volumes:
+      - ./postgres:/var/lib/postgresql
+    environment:
+      - POSTGRES_DB=$POSTGRES_DB
+      - POSTGRES_USER=$POSTGRES_USER
+      - POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+    ports:
+      - "5431:5432"
+    networks:
+      - myapp_network
+  adminer:
+    image: dpage/pgadmin4:latest
+    ports:
+      - '8088:80'
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=$PGADMIN_DEFAULT_EMAIL
+      - PGADMIN_DEFAULT_PASSWORD=$PGADMIN_DEFAULT_PASSWORD
+    networks:
+      - myapp_network
+  proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    volumes:
+      - ./nginx/data:/data
+      - ./nginx/letsencrypt:/etc/letsencrypt
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    networks:
+      - myapp_network       
+networks:
+  myapp_network:
+    driver: bridge
